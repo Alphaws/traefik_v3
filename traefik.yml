@@ -6,6 +6,10 @@ api:
   insecure: true
   debug: true
 
+log:
+  level: DEBUG
+  format: common
+
 entryPoints:
   web:
     address: ":80"
@@ -27,7 +31,7 @@ providers:
     watch: true
 
 certificatesResolvers:
-  letencrypt:
+  myresolver:
     acme:
       email: alphaws@gmail.com
       storage: /certs/acme.json
