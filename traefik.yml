@@ -35,6 +35,7 @@ certificatesResolvers:
     acme:
       email: alphaws@gmail.com
       storage: /certs/acme.json
+      tlsChallenge: {}
       # caServer: https://acme-v02.api.letsencrypt.org/directory # prod (default)
       caServer: https://acme-staging-v02.api.letsencrypt.org/directory # staging
       httpChallenge:
