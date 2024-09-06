@@ -8,12 +8,13 @@ services:
     command:
       - --global.sendAnonymousUsage=false
 
-      - --api.dashboard=${ENABLE_DASHBOARD}
-      - --api.insecure=${ENABLE_DASHBOARD}
-      - --api.debug=${ENABLE_DASHBOARD}
+      - --api.dashboard=${API_DASHBOARD}
+      - --api.insecure=${API_INSECURE}
+      - --api.debug=${API_DEBUG}
 
       - --log.level=${LOGLEVEL}
       - --log.format=${LOGFORMAT}
+      - --accesslog=true
 
       - --entryPoints.web.address=:80
       - --entryPoints.web.http.redirections.entryPoint.to=websecure
@@ -38,14 +39,17 @@ services:
     environment:
       - TZ=Europe/Budapest
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_HOST}`)"
-      - "traefik.http.routers.traefik.tls=true"
-      - "traefik.http.routers.traefik.tls.certresolver=myresolver"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - traefik.enable=true"
+      - traefik.http.routers.traefik.rule=Host(`${TRAEFIK_HOST}`)
+      - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.traefik.tls.certresolver=myresolver
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
+
     ports:
       - "80:80"
       - "443:443"
+      - "8080:8080"
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./certs:/certs
@@ -56,9 +60,9 @@ services:
     image: traefik/whoami
     container_name: whoami
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`${WHOAMI_HOST}`)"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+      - traefik.enable=true
+      - traefik.http.routers.whoami.rule=Host(`${WHOAMI_HOST}`)
+      - traefik.http.routers.whoami.tls=true
+      - traefik.http.routers.whoami.tls.certresolver=myresolver
     networks:
       - traefik
