@@ -5,28 +5,59 @@ networks:
 services:
   traefik:
     image: traefik:latest
+    command:
+      - --global.sendAnonymousUsage=false
+
+      - --api.dashboard=${ENABLE_DASHBOARD}
+      - --api.insecure=${ENABLE_DASHBOARD}
+      - --api.debug=${ENABLE_DASHBOARD}
+
+      - --log.level=${LOGLEVEL}
+      - --log.format=${LOGFORMAT}
+
+      - --entryPoints.web.address=:80
+      - --entryPoints.web.http.redirections.entryPoint.to=websecure
+      - --entryPoints.web.http.redirections.entryPoint.scheme=https
+      - --entryPoints.websecure.address=:443
+
+      - --serversTransport.insecureSkipVerify=true
+
+      - --providers.docker=true
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.watch=true
+
+      - --certificatesResolvers.myresolver.acme.email=${ACME_EMAIL}
+      - --certificatesResolvers.myresolver.acme.storage=/certs/acme.json
+      - --certificatesResolvers.myresolver.acme.tlsChallenge={}
+      - --certificatesResolvers.myresolver.acme.caServer=${CA_SERVER}
     container_name: traefik
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     environment:
       - TZ=Europe/Budapest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=myresolver"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik.yml:/etc/traefik/traefik.yml:ro
       - ./certs:/certs
     networks:
       - traefik
 
   whoami:
     image: traefik/whoami
+    container_name: whoami
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.prstart.hu`)"
+      - "traefik.http.routers.whoami.rule=Host(`${WHOAMI_HOST}`)"
       - "traefik.http.routers.whoami.tls=true"
       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
     networks:
